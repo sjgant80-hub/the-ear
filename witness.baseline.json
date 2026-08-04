@@ -1,0 +1,67 @@
+[
+  {
+    "mutation": "> → >=",
+    "snippet": "if (!(f1 > 0) || !(f2 > 0) || !(a1 > 0) || !(a2 > 0)) return 0;      // ignore non-physica",
+    "reason": "Reaches only the AMPLITUDE clauses !(a1>0)/!(a2>0) (the frequency clauses !(f1>0)/!(f2>0) are killed by §9 zero/negative-frequency tests). > → >= differs only at an amplitude of exactly 0, and at a1==0 or a2==0 the roughness r = a1*a2*(…) is exactly 0 — the guard-return 0 and the computed 0 are indistinguishable."
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "if (f1 > f2) { const tf = f1; f1 = f2; f2 = tf; const ta = a1; a1 = a2; a2 = ta; }",
+    "reason": "f1 > f2 → f1 >= f2 changes behaviour only at f1==f2, where df = f2-f1 = 0 makes r = a1*a2*(exp(0)-exp(0)) = 0 regardless of the (commutative) a1*a2 swap — output identical."
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "return r > 0 ? r : 0;",
+    "reason": "r > 0 ? r : 0 → r >= 0 ? r : 0 differs only at r==0, where the value returned is 0 either way."
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "return d > 0 ? d : 0;",
+    "reason": "d > 0 ? d : 0 → d >= 0 ? d : 0 differs only at d==0, where the value returned is 0 either way."
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "const x = span > 0 ? (r - BASELINE_R) / span : 0;",
+    "reason": "span > 0 guards a division by the module constant span = REFERENCE_R - BASELINE_R (~0.497), the same fixed positive value on every call; > vs >= could differ only at span==0, which never occurs — input-independent branch."
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "return x < 0 ? 0 : x > 1 ? 1 : x;",
+    "reason": "Upper clamp x > 1 ? 1 : x → x >= 1 ? 1 : x differs only at x==1, where both return 1."
+  },
+  {
+    "mutation": "> → >=",
+    "snippet": "function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }",
+    "reason": "clamp01's upper clamp x > 1 ? 1 : x → >= differs only at x==1, where both return 1."
+  },
+  {
+    "mutation": "< → <=",
+    "snippet": "for (let i = 0; i < partials.length; i++)",
+    "reason": "Outer loop i < partials.length → i <= partials.length adds one iteration at i==length; the inner loop (j=i+1; j<length) is then empty, so partials[i] is never dereferenced and the accumulator is unchanged — no observable effect, no throw."
+  },
+  {
+    "mutation": "< → <=",
+    "snippet": "return x < 0 ? 0 : x > 1 ? 1 : x;",
+    "reason": "Lower clamp x < 0 ? 0 → x <= 0 ? 0 differs only at x==0, where both yield 0 (original falls through to x>1?1:x → returns x = 0)."
+  },
+  {
+    "mutation": "< → <=",
+    "snippet": "export function label(state) { const d = dissonance01(state); return d < RESOLVED ? 'resol",
+    "reason": "The d < RESOLVED band edge differs only when dissonance01(state) === RESOLVED (0.08) exactly. Proven unreachable: scanning the full neighbourhood of roughness doubles r around BASELINE_R+0.08*span, clamp01((r-BASELINE_R)/span) never equals the double 0.08 (closest achievable 0.07999999999999996); every state maps to some roughness double, so no state can land on 0.08. (The TENSE and 0.6 edges ARE reachable and are killed in §10.)"
+  },
+  {
+    "mutation": "< → <=",
+    "snippet": "for (let i = 0; i < N; i++) {",
+    "reason": "render loop i < N → i <= N writes out[N] on the extra iteration; out is a Float32Array of length N, so the out-of-bounds write is silently dropped and samples 0..N-1 are unchanged — no observable effect."
+  },
+  {
+    "mutation": "< → <=",
+    "snippet": "function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }",
+    "reason": "clamp01's lower clamp x < 0 ? 0 → x <= 0 ? 0 differs only at x==0, where both yield 0 (and its arg heap = 0.30+leak ≥ 0.30, so x<0 is unreachable regardless)."
+  },
+  {
+    "mutation": "|| → &&",
+    "snippet": "if (!(f1 > 0) || !(f2 > 0) || !(a1 > 0) || !(a2 > 0)) return 0;      // ignore non-physica",
+    "reason": "Reaches only the amplitude short-circuit !(a1>0) || !(a2>0) (the frequency ||s are killed by §9 negative-frequency tests). It differs only when exactly one amplitude is non-physical (≤0); then r = a1*a2*(…) ≤ 0 and `r>0?r:0` clamps to 0 — identical to the guard returning 0."
+  }
+]
